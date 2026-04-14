@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sec 2 Geography Game: Singapore Urban Facilities</title>
+    <style>
+        :root {
+            --sg-blue: #005eb8;
+            --sg-red: #ef3340;
+            --sg-green: #2ecc71;
+            --background: #f4f7f6;
+            --panel: #ffffff;
+            --text: #333333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+            color: var(--text);
+        }
+
+        /* --- START SCREEN OVERLAY --- */
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--sg-blue);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #start-screen h1 { font-size: 2.5rem; margin-bottom: 20px; }
+        #start-screen p { max-width: 600px; font-size: 1.2rem; line-height: 1.6; margin-bottom: 30px; }
+
+        .big-btn {
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--sg-blue);
+            background: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .big-btn:hover {
+            transform: scale(1.05);
+            background: #f0f0f0;
+        }
+
+        /* --- MAIN GAME LAYOUT --- */
+        #game-layout {
+            display: none; /* Hidden until game starts */
+            flex-direction: column;
+            align-items: center;
+            max-width: 1000px;
+            width: 100%;
+            gap: 15px;
+        }
+
+        #ui-layer {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            background: var(--panel);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .stat { font-size: 1.3rem; font-weight: bold; }
+        #timer { color: var(--sg-red); font-size: 1.5rem; }
+        #score { color: var(--sg-green); font-size: 1.5rem; }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        img#game-image { width: 100%; display: block; height: auto; }
+
+        #click-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        .target-zone { fill: rgba(255, 255, 255, 0.01); stroke: none; }
+        .target-zone.found {
+            fill: rgba(0, 255, 0, 0.15);
+            stroke: rgba(0, 255, 0, 0.8);
+            stroke-width: 3;
+            pointer-events: none;
+        }
+
+        /* --- WORD BANK --- */
+        #word-bank-container {
+            width: 100%;
+            background: var(--panel);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        #word-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px 20px;
+        }
+
+        #word-list li {
+            font-size: 1.1rem;
+            background: #eee;
+            padding: 8px 15px;
+            border-radius: 20px;
+            color: #444;
+        }
+
+        #word-list li.found-word {
+            text-decoration: line-through;
+            color: #aaa;
+            background: #e0e0e0;
+        }
+
+        /* --- MODAL --- */
+        #modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 300;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #modal {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .secret-code {
+            display: inline-block;
+            margin-top: 10px;
+            font-family: monospace;
+            background: #eee;
+            padding: 10px;
+            color: var(--sg-blue);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen">
+        <h1>HDB Estate Facilities Challenge</h1>
+        <p>
+            You have 45 seconds to find 9 facilities in the HDB estate. <br>
+            The names of the 9 facilities will be shown to you. <br>
+            You will need to click on the photograph to locate the 9 facilities. <br><br>
+            Start the game whenever you're ready to play!
+        </p>
+        <button class="big-btn" onclick="initGame()">START GAME</button>
+    </div>
+
+    <div id="game-layout">
+        <div id="ui-layer">
+            <div class="stat">Time Remaining: <span id="timer">45</span>s</div>
+            <div class="stat">Found: <span id="score">0</span> / 9</div>
+        </div>
+
+        <div id="game-container">
+            <img src="Original.jpg" id="game-image">
+            <svg id="click-mask" viewBox="0 0 1000 524" xmlns="http://www.w3.org/2000/svg">
+                <rect class="target-zone" x="25" y="278" width="183" height="113" data-target="w-school" />
+                <rect class="target-zone" x="80" y="556" width="193" height="175" data-target="w-sports" />
+                <rect class="target-zone" x="193" y="347" width="225" height="137" data-target="w-mph" />
+                <rect class="target-zone" x="424" y="210" width="177" height="69" data-target="w-park" />
+                <rect class="target-zone" x="402" y="556" width="128" height="128" data-target="w-playground" />
+                <rect class="target-zone" x="473" y="360" width="180" height="135" data-target="w-hawker" />
+                <rect class="target-zone" x="638" y="399" width="175" height="116" data-target="w-supermarket" />
+                <rect class="target-zone" x="312" y="792" width="206" height="92" data-target="w-bus" />
+                <rect class="target-zone" x="817" y="569" width="178" height="280" data-target="w-train" />
+            </svg>
+        </div>
+
+        <div id="word-bank-container">
+            <ul id="word-list">
+                <li id="w-bus">Bus Stop</li>
+                <li id="w-hawker">Hawker Centre</li>
+                <li id="w-mph">Multipurpose Hall</li>
+                <li id="w-park">Park Connector</li>
+                <li id="w-playground">Playground</li>
+                <li id="w-school">School</li>
+                <li id="w-sports">Sports Court</li>
+                <li id="w-supermarket">Supermarket</li>
+                <li id="w-train">Train Station</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="modal-overlay">
+        <div id="modal">
+            <h2 id="modal-title"></h2>
+            <p id="modal-body"></p>
+            <button class="big-btn" style="font-size: 1rem;" onclick="location.reload()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        let timeLeft = 45;
+        let score = 0;
+        let timerId;
+
+        function initGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-layout').style.display = 'flex';
+            
+            timerId = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+                if (timeLeft <= 0) endGame(false);
+            }, 1000);
+        }
+
+        document.querySelectorAll('.target-zone').forEach(zone => {
+            zone.addEventListener('click', function() {
+                if (this.classList.contains('found')) return;
+
+                this.classList.add('found');
+                score++;
+                document.getElementById('score').textContent = score;
+
+                const wordId = this.getAttribute('data-target');
+                document.getElementById(wordId).classList.add('found-word');
+
+                if (score === 9) endGame(true);
+            });
+        });
+
+        function endGame(win) {
+            clearInterval(timerId);
+            const overlay = document.getElementById('modal-overlay');
+            const title = document.getElementById('modal-title');
+            const body = document.getElementById('modal-body');
+            
+            overlay.style.display = 'flex';
+
+            if (win) {
+                document.getElementById('game-image').src = "Answer.jpg";
+                title.textContent = "Well Done!";
+                title.style.color = "var(--sg-green)";
+                body.innerHTML = "You found all facilities!<br>Secret Code:<br><span class='secret-code'>HDB-PRO-2026</span>";
+            } else {
+                title.textContent = "Game Over";
+                title.style.color = "var(--sg-red)";
+                body.textContent = "You've run out of time. Try again next time!";
+            }
+        }
+    </script>
+</body>
+</html>

@@ -151,7 +151,7 @@
     <div id="start-screen">
         <h1>HDB Facilities Challenge</h1>
         <p style="max-width: 500px; line-height: 1.6;">
-            Find <b>9 facilities</b> in the HDB estate that you will see.<br><br>
+            Find <b>7 facilities</b> in the HDB estate that you will see.<br><br>
             You have <b>60 seconds</b>. Type the name of one facility at a time and press <b>ENTER</b> to submit each response.
         </p>
         <button class="big-btn" onclick="startGame()">START GAME</button>
@@ -184,7 +184,7 @@
     <script>
         const facilities = [
             "School", "Multipurpose Hall", "Sports Court", "Bus Stop", 
-            "Playground", "Hawker Centre", "Supermarket", "Train Station", "Park Connector"
+            "Playground", "Hawker Centre", "Train Station",
         ];
         
         let foundItems = [];
@@ -256,7 +256,7 @@
             
             if (win) {
                 document.getElementById('modal-title').textContent = "Excellent!";
-                document.getElementById('modal-body').innerHTML = "You found all 9 facilities!<br><br>Secret Code: <b>IMAHDBPRO</b>";
+                document.getElementById('modal-body').innerHTML = "You found all 7 facilities!<br><br>Secret Code: <b>IMAHDBPRO</b>";
             } else {
                 document.getElementById('modal-title').textContent = "Time's Up!";
                 document.getElementById('modal-body').textContent = "You've run out of time. Try again next time!";

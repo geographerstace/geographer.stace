@@ -152,14 +152,14 @@
         <h1>HDB Facilities Recall</h1>
         <p style="max-width: 500px; line-height: 1.6;">
             Look at the HDB photo. Type the names of <b>9 facilities</b> that you see.<br><br>
-            You have <b>45 seconds</b>. Press <b>ENTER</b> to submit.
+            You have <b>60 seconds</b>. Press <b>ENTER</b> to submit.
         </p>
         <button class="big-btn" onclick="startGame()">START GAME</button>
     </div>
 
     <div id="game-layout">
         <div id="ui-layer">
-            <div>Time Remaining: <span id="timer" style="color:var(--sg-red); font-weight:bold;">45</span>s</div>
+            <div>Time Remaining: <span id="timer" style="color:var(--sg-red); font-weight:bold;">60</span>s</div>
             <div>Found: <span id="score" style="color:var(--sg-green); font-weight:bold;">0</span> / 9</div>
         </div>
 
@@ -188,7 +188,7 @@
         ];
         
         let foundItems = [];
-        let timeLeft = 45;
+        let timeLeft = 60;
         let timerId;
 
         function startGame() {
